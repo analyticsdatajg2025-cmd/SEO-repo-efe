@@ -5,3 +5,7 @@ publicar.env
 node_modules/
 docs/*/*/partes/
 docs/*/*/fin.json
+
+# Credenciales de Google (nunca subir)
+config/credentials.json
+__pycache__/
