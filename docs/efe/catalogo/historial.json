@@ -1,5 +1,14 @@
 [
  {
+  "cuando": "2026-10-17T12:51:49.363Z",
+  "productos": 16771,
+  "nuevas": 491,
+  "reusadas": 16280,
+  "retiradas": 1080,
+  "borradas": 0,
+  "paso": "Unir"
+ },
+ {
   "cuando": "2026-10-16T20:44:35.325Z",
   "productos": 16894,
   "nuevas": 170,
