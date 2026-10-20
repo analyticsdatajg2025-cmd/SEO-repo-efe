@@ -5,3 +5,7 @@ publicar.env
 node_modules/
 docs/*/*/partes/
 docs/*/*/fin.json
+# SEO: el repo es público. Ni la clave de la cuenta de servicio ni los datos de Search Console se suben.
+seo/datos.js
+seo-grupo-efe-api-*.json
+*service-account*.json

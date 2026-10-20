@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEO Tiendas EFE</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f4f1;
+  --surface-1: #fcfcfb;
+  --border: #e3e2dc;
+  --grid: #ecebe6;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #7a7974;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --good: #1a7f37;
+  --bad: #c62828;
+  --accent: #e30613;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #111110;
+    --surface-1: #1a1a19;
+    --border: #2e2e2c;
+    --grid: #262624;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8f8e86;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --good: #4cc26a;
+    --bad: #ef6b6b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #111110;
+  --surface-1: #1a1a19;
+  --border: #2e2e2c;
+  --grid: #262624;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8f8e86;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --good: #4cc26a;
+  --bad: #ef6b6b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+.wrap { max-width: 1200px; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+h1 { font-size: 20px; margin: 0; display: flex; align-items: center; gap: 10px; }
+h1 .marca { width: 10px; height: 22px; background: var(--accent); border-radius: 2px; }
+.sub { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+.seg { display: inline-flex; max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-1); }
+.seg button {
+  flex: none; border: 0; background: none; color: var(--text-secondary); font: inherit; padding: 6px 12px; cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--border); }
+.seg button[aria-pressed="true"] { background: var(--text-primary); color: var(--surface-1); }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px; }
+.kpi .eti { color: var(--text-secondary); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.kpi .eti i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.kpi .val { font-size: 28px; font-weight: 600; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.kpi .delta { font-size: 13px; color: var(--text-muted); }
+.kpi .delta b { font-weight: 600; }
+.kpi .delta .up { color: var(--good); }
+.kpi .delta .down { color: var(--bad); }
+.charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+.chart h2, .tabla h2 { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
+.chart h2 small { font-weight: 400; color: var(--text-muted); }
+.chart svg { display: block; width: 100%; height: 190px; overflow: visible; }
+.chart .ax { fill: var(--text-muted); font-size: 11px; }
+.chart .gl { stroke: var(--grid); stroke-width: 1; }
+.chart .ln { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ar { opacity: .10; }
+.chart .ch { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .pt { stroke: var(--surface-1); stroke-width: 2; }
+.tip {
+  position: fixed; pointer-events: none; z-index: 10; background: var(--surface-1); color: var(--text-primary);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); display: none; white-space: nowrap;
+}
+.tip b { font-variant-numeric: tabular-nums; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+input[type=search] {
+  font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-0); color: var(--text-primary); min-width: 220px;
+}
+.scroll { overflow: auto; max-height: 560px; }
+thead th { position: sticky; top: 0; background: var(--surface-1); z-index: 1; }
+.filtros { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.filtros label { color: var(--text-secondary); font-size: 13px; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 8px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+td:first-child { max-width: 520px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+td:first-child a { color: var(--text-primary); text-decoration: none; }
+td:first-child a:hover { text-decoration: underline; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 12px; cursor: pointer; user-select: none; white-space: nowrap; }
+th[aria-sort="descending"]::after { content: " ▼"; }
+th[aria-sort="ascending"]::after { content: " ▲"; }
+.barra { display: inline-block; height: 6px; border-radius: 3px; background: var(--series-1); vertical-align: middle; margin-right: 8px; opacity: .8; }
+.nota { color: var(--text-muted); font-size: 12px; margin-top: 8px; }
+.vacio { text-align: center; padding: 48px 16px; }
+.vacio code { background: var(--surface-0); padding: 2px 6px; border-radius: 4px; }
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .charts { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .kpi .val { font-size: 22px; }
+  input[type=search] { min-width: 0; width: 100%; }
+}
+</style>
+<script src="datos.js"></script>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="tip" id="tip"></div>
+<script>
+'use strict';
+const D = window.GSC_DATOS;
+const app = document.getElementById('app');
+const tip = document.getElementById('tip');
+const nf = new Intl.NumberFormat('es-PE');
+const nfc = new Intl.NumberFormat('es-PE', { notation: 'compact', maximumFractionDigits: 1 });
+const pct = v => (v * 100).toLocaleString('es-PE', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) + '\u00a0%';
+const pos = v => v.toLocaleString('es-PE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const fecha = s => new Date(s + 'T00:00:00Z').toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const fechaCorta = s => new Date(s + 'T00:00:00Z').toLocaleDateString('es-PE', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+if (!D) {
+  app.innerHTML = `<div class="card vacio"><h1 style="justify-content:center"><span class="marca"></span>SEO Tiendas EFE</h1>
+    <p>Todavía no hay datos. Falta <code>seo/datos.js</code>.</p>
+    <p class="sub">Generalo con <code>node seo/gsc.js ruta/a/la-clave.json</code> o con el workflow <b>SEO Search Console</b> en Actions.</p></div>`;
+  throw new Error('sin datos');
+}
+
+const RANGOS = Object.keys(D.tablas).map(Number).sort((a, b) => a - b);
+const estado = { rango: RANGOS.includes(28) ? 28 : RANGOS[0], tab: 'consultas', q: '', sinMarca: false, orden: 'clics', dir: -1 };
+// Consultas de marca: las que nombran a efe (tiendas efe, efe tienda, efectiva no cuenta).
+const MARCA = /(^|\s)(tiendas?\s*)?efe(\s|$)/i;
+try { const r = Number(localStorage.getItem('seo-rango')); if (RANGOS.includes(r)) estado.rango = r; } catch {}
+
+// Totales de un tramo de la serie diaria: posición ponderada por impresiones, como Search Console.
+function totales(filas) {
+  let clics = 0, impresiones = 0, sp = 0;
+  for (const f of filas) { clics += f.clics; impresiones += f.impresiones; sp += f.posicion * f.impresiones; }
+  return { clics, impresiones, ctr: impresiones ? clics / impresiones : 0, posicion: impresiones ? sp / impresiones : 0 };
+}
+
+function tramo(n) {
+  const d = D.diario, fin = d.length;
+  return { actual: d.slice(Math.max(0, fin - n)), previo: fin - n > 0 ? d.slice(Math.max(0, fin - 2 * n), fin - n) : [] };
+}
+
+function delta(act, prev, menorEsMejor, fmt) {
+  if (!prev) return '<span>Sin período anterior</span>';
+  const dif = act - prev;
+  if (Math.abs(dif) < 1e-9) return 'Igual que el período anterior';
+  const mejor = menorEsMejor ? dif < 0 : dif > 0;
+  const txt = fmt ? fmt(Math.abs(dif)) : (Math.abs(dif / prev) * 100).toLocaleString('es-PE', { maximumFractionDigits: 1 }) + ' %';
+  // La flecha dice si mejoró, no si el número subió: en posición, bajar es subir en Google.
+  return `<b class="${mejor ? 'up' : 'down'}">${mejor ? '▲' : '▼'} ${menorEsMejor ? (mejor ? 'mejora ' : 'cae ') : (dif > 0 ? '+' : '−')}${txt}</b> vs. ${estado.rango} días previos`;
+}
+
+function render() {
+  const { actual, previo } = tramo(estado.rango);
+  const t = totales(actual), p = previo.length === actual.length ? totales(previo) : null;
+  const tab = D.tablas[estado.rango];
+  app.innerHTML = `
+    <header>
+      <div>
+        <h1><span class="marca"></span>SEO Tiendas EFE</h1>
+        <div class="sub">${esc(D.sitio)} · ${fecha(actual[0].fecha)} – ${fecha(actual[actual.length - 1].fecha)} · actualizado ${new Date(D.generado).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Lima' })}</div>
+      </div>
+      <div class="seg" role="group" aria-label="Período">
+        ${RANGOS.map(n => `<button data-rango="${n}" aria-pressed="${n === estado.rango}">${n === 365 ? '12 meses' : n + ' días'}</button>`).join('')}
+      </div>
+    </header>
+    <section class="kpis">
+      <div class="card kpi"><div class="eti"><i style="background:var(--series-1)"></i>Clics</div><div class="val">${nf.format(t.clics)}</div><div class="delta">${p ? delta(t.clics, p.clics) : delta()}</div></div>
+      <div class="card kpi"><div class="eti"><i style="background:var(--series-2)"></i>Impresiones</div><div class="val">${nf.format(t.impresiones)}</div><div class="delta">${p ? delta(t.impresiones, p.impresiones) : delta()}</div></div>
+      <div class="card kpi"><div class="eti">CTR medio</div><div class="val">${pct(t.ctr)}</div><div class="delta">${p ? delta(t.ctr, p.ctr, false, v => (v * 100).toLocaleString('es-PE', { maximumFractionDigits: 2 }) + ' pts') : delta()}</div></div>
+      <div class="card kpi"><div class="eti"><i style="background:var(--series-3)"></i>Posición media</div><div class="val">${pos(t.posicion)}</div><div class="delta">${p ? delta(t.posicion, p.posicion, true, v => pos(v) + ' pos.') : delta()}</div></div>
+    </section>
+    <section class="charts">
+      <div class="card chart"><h2>Clics por día</h2><svg id="g-clics" role="img" aria-label="Clics por día"></svg></div>
+      <div class="card chart"><h2>Impresiones por día</h2><svg id="g-impresiones" role="img" aria-label="Impresiones por día"></svg></div>
+      <div class="card chart"><h2>Posición media <small>(arriba = mejor)</small></h2><svg id="g-posicion" role="img" aria-label="Posición media por día"></svg></div>
+    </section>
+    <section class="card tabla">
+      <div class="tabs">
+        <div class="seg" role="tablist">
+          ${[['consultas', 'Consultas'], ['paginas', 'Páginas'], ['dispositivos', 'Dispositivos'], ['paises', 'Países']]
+            .map(([k, v]) => `<button role="tab" data-tab="${k}" aria-pressed="${k === estado.tab}">${v}</button>`).join('')}
+        </div>
+        <div class="filtros">
+          <label id="l-marca" ${estado.tab === 'consultas' ? '' : 'hidden'}><input type="checkbox" id="sin-marca" ${estado.sinMarca ? 'checked' : ''}> Ocultar consultas de marca («efe»)</label>
+          <input type="search" id="q" placeholder="Filtrar…" value="${esc(estado.q)}" aria-label="Filtrar filas">
+        </div>
+      </div>
+      <div class="scroll"><table id="tbl"></table></div>
+      <div class="nota">${tab.desde} → ${tab.hasta}. Se muestran las filas principales que da Search Console; las consultas anónimas no aparecen, por eso la suma de la tabla puede ser menor que el total.</div>
+    </section>`;
+
+  linea('g-clics', actual, 'clics', 'var(--series-1)', v => nf.format(v), false);
+  linea('g-impresiones', actual, 'impresiones', 'var(--series-2)', v => nf.format(v), false);
+  linea('g-posicion', actual, 'posicion', 'var(--series-3)', pos, true);
+  tabla();
+
+  app.querySelectorAll('[data-rango]').forEach(b => b.onclick = () => {
+    estado.rango = Number(b.dataset.rango);
+    try { localStorage.setItem('seo-rango', estado.rango); } catch {}
+    render();
+  });
+  app.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => {
+    estado.tab = b.dataset.tab;
+    app.querySelectorAll('[data-tab]').forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.getElementById('l-marca').hidden = estado.tab !== 'consultas';
+    tabla();
+  });
+  document.getElementById('q').oninput = e => { estado.q = e.target.value; tabla(); };
+  document.getElementById('sin-marca').onchange = e => { estado.sinMarca = e.target.checked; tabla(); };
+}
+
+// Línea con área tenue, eje Y en ticks redondos y crosshair con tooltip.
+function linea(id, filas, campo, color, fmt, invertido) {
+  const svg = document.getElementById(id);
+  const W = svg.clientWidth || 360, H = 190, m = { t: 8, r: 8, b: 22, l: 44 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const vals = filas.map(f => f[campo]);
+  let lo = invertido ? Math.min(...vals) : 0, hi = Math.max(...vals);
+  if (invertido) { const pad = (hi - lo) * 0.1 || 1; lo = Math.max(1, lo - pad); hi = hi + pad; }
+  const paso = tickPaso(hi - lo, 4);
+  lo = Math.floor(lo / paso) * paso; hi = Math.ceil(hi / paso) * paso || paso;
+  const x = i => m.l + (filas.length > 1 ? i / (filas.length - 1) : 0.5) * iw;
+  const y = v => invertido ? m.t + (v - lo) / (hi - lo) * ih : m.t + ih - (v - lo) / (hi - lo) * ih;
+  const ticks = []; for (let v = lo; v <= hi + 1e-9; v += paso) ticks.push(v);
+  const path = filas.map((f, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(f[campo]).toFixed(1)).join('');
+  const base = invertido ? m.t + ih : y(lo);
+  const nx = Math.min(filas.length, Math.max(2, Math.floor(iw / 70)));
+  const xt = []; for (let k = 0; k < nx; k++) xt.push(Math.round(k * (filas.length - 1) / (nx - 1)));
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `
+    ${ticks.map(v => `<line class="gl" x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end">${invertido ? pos(v) : nfc.format(v)}</text>`).join('')}
+    ${xt.map((i, k) => `<text class="ax" x="${x(i)}" y="${H - 6}" text-anchor="${k === 0 ? 'start' : k === xt.length - 1 ? 'end' : 'middle'}">${fechaCorta(filas[i].fecha)}</text>`).join('')}
+    ${invertido ? '' : `<path class="ar" fill="${color}" d="${path}L${x(filas.length - 1)},${base}L${x(0)},${base}Z"/>`}
+    <path class="ln" stroke="${color}" d="${path}"/>
+    <line class="ch" y1="${m.t}" y2="${m.t + ih}" visibility="hidden"/>
+    <circle class="pt" r="4.5" fill="${color}" visibility="hidden"/>
+    <rect x="${m.l}" y="0" width="${iw}" height="${H}" fill="transparent"/>`;
+  const ch = svg.querySelector('.ch'), pt = svg.querySelector('.pt'), hit = svg.querySelector('rect');
+  const mover = ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) * W / r.width;
+    const i = Math.max(0, Math.min(filas.length - 1, Math.round((px - m.l) / iw * (filas.length - 1))));
+    const f = filas[i];
+    ch.setAttribute('x1', x(i)); ch.setAttribute('x2', x(i)); ch.setAttribute('visibility', 'visible');
+    pt.setAttribute('cx', x(i)); pt.setAttribute('cy', y(f[campo])); pt.setAttribute('visibility', 'visible');
+    tip.innerHTML = `${fecha(f.fecha)}<br>Clics <b>${nf.format(f.clics)}</b> · Impr. <b>${nf.format(f.impresiones)}</b><br>CTR <b>${pct(f.ctr)}</b> · Posición <b>${pos(f.posicion)}</b>`;
+    tip.style.display = 'block';
+    const tx = ev.clientX + 14, tw = tip.offsetWidth;
+    tip.style.left = (tx + tw > innerWidth - 8 ? ev.clientX - tw - 14 : tx) + 'px';
+    tip.style.top = (ev.clientY - tip.offsetHeight - 10) + 'px';
+  };
+  hit.addEventListener('pointermove', mover);
+  hit.addEventListener('pointerdown', mover);
+  hit.addEventListener('pointerleave', () => { tip.style.display = 'none'; ch.setAttribute('visibility', 'hidden'); pt.setAttribute('visibility', 'hidden'); });
+}
+
+function tickPaso(rango, n) {
+  if (rango <= 0) return 1;
+  const bruto = rango / n, mag = 10 ** Math.floor(Math.log10(bruto)), r = bruto / mag;
+  return (r <= 1 ? 1 : r <= 2 ? 2 : r <= 5 ? 5 : 10) * mag;
+}
+
+const DISPOSITIVO = { MOBILE: 'Móvil', DESKTOP: 'Escritorio', TABLET: 'Tablet' };
+let paisNombre; try { paisNombre = new Intl.DisplayNames(['es'], { type: 'region' }); } catch {}
+const ISO3 = { per: 'PE', usa: 'US', arg: 'AR', chl: 'CL', col: 'CO', mex: 'MX', esp: 'ES', ecu: 'EC', bol: 'BO', ven: 'VE', bra: 'BR' };
+function nombreClave(tab, k) {
+  if (tab === 'dispositivos') return DISPOSITIVO[k] || k;
+  if (tab === 'paises') { try { return (ISO3[k] && paisNombre) ? paisNombre.of(ISO3[k]) : k.toUpperCase(); } catch { return k.toUpperCase(); } }
+  return k;
+}
+
+function tabla() {
+  const rs = D.tablas[estado.rango][estado.tab];
+  const q = estado.q.trim().toLowerCase();
+  let filas = rs.filter(f => (!q || nombreClave(estado.tab, f.clave).toLowerCase().includes(q)) &&
+    !(estado.sinMarca && estado.tab === 'consultas' && MARCA.test(f.clave)));
+  const { orden, dir } = estado;
+  filas = filas.slice().sort((a, b) => orden === 'clave' ? dir * String(a.clave).localeCompare(b.clave) : dir * (a[orden] - b[orden]));
+  const max = Math.max(1, ...rs.map(f => f.clics));
+  const titulo = { consultas: 'Consulta', paginas: 'Página', dispositivos: 'Dispositivo', paises: 'País' }[estado.tab];
+  const cols = [['clave', titulo], ['clics', 'Clics'], ['impresiones', 'Impresiones'], ['ctr', 'CTR'], ['posicion', 'Posición']];
+  const celda = f => {
+    const n = esc(nombreClave(estado.tab, f.clave));
+    if (estado.tab !== 'paginas') return n;
+    let corto = f.clave; try { const u = new URL(f.clave); corto = u.pathname + u.search; } catch {}
+    return `<a href="${esc(f.clave)}" target="_blank" rel="noopener" title="${n}">${esc(corto)}</a>`;
+  };
+  document.getElementById('tbl').innerHTML = `
+    <thead><tr>${cols.map(([k, v]) => `<th data-orden="${k}" ${k === orden ? `aria-sort="${dir < 0 ? 'descending' : 'ascending'}"` : ''}>${v}</th>`).join('')}</tr></thead>
+    <tbody>${filas.length ? filas.map(f => `<tr>
+      <td>${celda(f)}</td>
+      <td><span class="barra" style="width:${Math.round(f.clics / max * 60)}px"></span>${nf.format(f.clics)}</td>
+      <td>${nf.format(f.impresiones)}</td>
+      <td>${pct(f.ctr)}</td>
+      <td>${pos(f.posicion)}</td></tr>`).join('') : `<tr><td colspan="5" style="text-align:center;color:var(--text-muted)">Sin filas</td></tr>`}</tbody>`;
+  document.querySelectorAll('#tbl th').forEach(th => th.onclick = () => {
+    const k = th.dataset.orden;
+    if (estado.orden === k) estado.dir = -estado.dir;
+    else { estado.orden = k; estado.dir = (k === 'clave' || k === 'posicion') ? 1 : -1; }
+    tabla();
+  });
+}
+
+render();
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(render, 150); });
+</script>
+</body>
+</html>
