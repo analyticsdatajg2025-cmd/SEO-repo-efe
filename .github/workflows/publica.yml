@@ -16,12 +16,13 @@ name: Feeds a Pages
 
 on:
   schedule:
-    # Dos veces por hora a propósito: GitHub retrasa o se salta corridas programadas cuando está
-    # cargado (el 2026-09-23 disparó solo 3 de 24 en un día, a las :24, :32 y :14), así que la
-    # elección de qué toca ya no es «la hora exacta» sino «qué hora programada venció y todavía
-    # no se publicó» (ver el job recetas). Cada disparo de más cuesta segundos.
-    - cron: '0 * * * *'
-    - cron: '30 * * * *'
+    # Una publicación al día (receta: 07:00 Lima). Antes eran dos disparos por hora: 48 revisiones
+    # diarias que GitHub cobra como 1 minuto cada una y se comían el cupo gratis del repo privado
+    # (2.000 min/mes). Quedan dos disparos: 07:07 Lima publica; 09:37 Lima es solo de respaldo por si
+    # GitHub se saltó el primero (si ya se publicó, «recetas» no encuentra nada y no dibuja).
+    # Minutos fuera de :00 y :30 porque GitHub retrasa más los disparos en punto. Hora en UTC (Lima = UTC-5).
+    - cron: '7 12 * * *'
+    - cron: '37 14 * * *'
   # «Actualizar ahora» desde el panel «Mis feeds»: el servidor local escribe auto/ahora.json con el
   # feed pedido y empuja. Ese empujón dispara esta corrida al instante, sin secretos ni token.
   push:
