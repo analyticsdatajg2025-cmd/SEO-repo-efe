@@ -16,7 +16,7 @@ name: Feeds a Pages
 
 on:
   schedule:
-    # Una publicación al día (receta: 07:00 Lima). Antes eran dos disparos por hora: 48 revisiones
+    # Una publicación cada `cada_dias` días a las 07:00 Lima (receta efe/catalogo: un día sí, un día no). Antes eran dos disparos por hora: 48 revisiones
     # diarias que GitHub cobra como 1 minuto cada una y se comían el cupo gratis del repo privado
     # (2.000 min/mes). Quedan dos disparos: 07:07 Lima publica; 09:37 Lima es solo de respaldo por si
     # GitHub se saltó el primero (si ya se publicó, «recetas» no encuentra nada y no dibuja).
@@ -86,6 +86,8 @@ jobs:
                 const p = JSON.parse(fs.readFileSync("auto/ahora.json", "utf8"));
                 const t = Date.parse(p.pedido);
                 if (Array.isArray(p.slugs) && p.slugs.length && t && Date.now() - t < 6 * 3600e3) ahora = new Set(p.slugs);
+                // `auto`: lo empujó el reloj de la nube por una hora vencida; se vuelve a exigir que toque.
+                if (ahora && p.auto) ahora.auto = true;
               } catch { /* sin pedido: no corre nada */ }
               if (!ahora) console.log("El empujón no trae ningún pedido vigente en auto/ahora.json");
             }
@@ -107,6 +109,16 @@ jobs:
               }
               return false;
             }
+            // `cada_dias` (receta): 2 = un día sí y un día no. Se salta si se publicó hace menos de
+            // cada_dias × 24 h − 6 h (holgura para que el disparo de las 07:07 no caiga justo antes).
+            function descansa(slug, r) {
+              const n = Math.max(1, Number(r.cada_dias) || 1); if (n === 1) return false;
+              let ultima = 0;
+              try { const h = JSON.parse(fs.readFileSync(path.join("docs", slug, "historial.json"), "utf8")); ultima = Date.parse((h.corridas || h)[0].cuando) || 0; } catch { /* nunca corrió */ }
+              if (ahoraMs - ultima < (n * 24 - 6) * 3600e3) { console.log(slug + ": hoy descansa (publica cada " + n + " días)"); return true; }
+              return false;
+            }
+            const toca = (slug, r) => vencida(slug, Array.isArray(r.horas) && r.horas.length ? r.horas : ["07:00", "15:00"]) && !descansa(slug, r);
             const raiz = "auto/recetas", feeds = [], matriz = [];
             for (const t of fs.existsSync(raiz) ? fs.readdirSync(raiz, { withFileTypes: true }) : []) {
               if (!t.isDirectory()) continue;
@@ -115,11 +127,10 @@ jobs:
                 const slug = t.name + "/" + f.slice(0, -5);
                 let r; try { r = JSON.parse(fs.readFileSync(path.join(raiz, t.name, f), "utf8")); } catch { continue; }
                 if (manual) { if (slug !== manual) continue; }
-                else if (process.env.EVENTO === "push") { if (!ahora || !ahora.has(slug)) continue; }
+                else if (process.env.EVENTO === "push") { if (!ahora || !ahora.has(slug)) continue; if (ahora.auto && !toca(slug, r)) continue; }
                 else {
                   if (r.activo === false) continue;
-                  const horas = Array.isArray(r.horas) && r.horas.length ? r.horas : ["07:00", "15:00"];
-                  if (!vencida(slug, horas)) continue;
+                  if (!toca(slug, r)) continue;
                 }
                 // Tope de 20 jobs en paralelo en el plan gratuito; con 1 parte igual funciona (más lento).
                 const de = Math.min(20, Math.max(1, pManual || Number(r.partes) || 8));
